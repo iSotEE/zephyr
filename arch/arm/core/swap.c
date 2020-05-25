@@ -58,8 +58,17 @@ int __swap(int key)
 	/* set pending bit to make sure we will take a PendSV exception */
 	SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk;
 
+#if defined(CONFIG_SUPPORT_ISOTEE)
+    /* We must ensure
+     * 1) Guest interrupts are disabled since the guest may be in critical section.
+     * 2) PendSV has the lowest enabled priority so it will be always trapped from thread mode.
+     */
+    NVIC_SetPriority(PendSV_IRQn, CONFIG_ISOTEE_HOST_PENDSV_PRIO);
+    irq_unlock(Z_EXC_PRIO(CONFIG_ISOTEE_GUEST_IRQ_PRIO));
+#else
 	/* clear mask or enable all irqs to take a pendsv */
 	irq_unlock(0);
+#endif
 
 	/* Context switch is performed here. Returning implies the
 	 * thread has been context-switched-in again.

@@ -28,6 +28,11 @@ GDATA(_k_neg_eagain)
 
 GDATA(_kernel)
 
+#if defined(CONFIG_SUPPORT_ISOTEE)
+GDATA(_k_thread_obj_ISOTEE_GUEST)
+GDATA(_isotee_bare_metal_hypercall_table)
+#endif
+
 /**
  *
  * @brief PendSV exception handler, handling context switches
@@ -175,6 +180,18 @@ _thread_irq_disabled:
     subs r0, #36
     ldmia r0!, {r4-r7}
 #elif defined(CONFIG_ARMV7_M_ARMV8_M_MAINLINE)
+
+#if defined(CONFIG_SUPPORT_ISOTEE)
+    /* Set PendSV priority accordingly */
+    ldr v1, =#0xE000ED22 /* SHPR3 fixed address for ARMv7-M */
+    ldr v2, =_k_thread_obj_ISOTEE_GUEST
+    cmp r2, v2
+    ITE EQ
+    moveq v2, #Z_EXC_PRIO(CONFIG_ISOTEE_GUEST_IRQ_PRIO)
+    movne v2, #Z_EXC_PRIO(CONFIG_ISOTEE_HOST_PENDSV_PRIO)
+    strb v2, [v1]
+#endif
+
     /* restore BASEPRI for the incoming thread */
     msr BASEPRI, r0
 
@@ -354,6 +371,17 @@ SECTION_FUNC(TEXT, __svc)
 
     cmp r1, #3
     beq _do_syscall
+
+#if defined(CONFIG_SUPPORT_ISOTEE)
+    subs r3, r1, #CONFIG_ISOTEE_BARE_METAL_HYPERCALL_MIN_SVC
+    bmi _isotee_not_bare_metal_hypercall
+    cmp r3, #CONFIG_ISOTEE_BARE_METAL_HYPERCALL_NUM
+    bhs _isotee_not_bare_metal_hypercall
+    ldr ip, =_isotee_bare_metal_hypercall_table
+    ldr ip, [ip, r3, LSL #2]
+    bx ip /* jump with the stack frame in r0 */
+_isotee_not_bare_metal_hypercall:
+#endif
 
     /*
      * check that we are privileged before invoking other SVCs

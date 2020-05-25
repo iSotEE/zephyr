@@ -41,6 +41,14 @@ GTEXT(_IntExit)
  */
 SECTION_FUNC(TEXT, _isr_wrapper)
 
+#if defined(CONFIG_SUPPORT_ISOTEE)
+    ldr r0, =_isotee_thread_trap_psp
+    tst lr, #0x4
+    ITT NE          /* if we came from thread mode: */
+    mrsne r1, PSP
+    strne r1, [r0]  /* update _isotee_thread_trap_psp */
+#endif
+
 	push {r0,lr}		/* r0, lr are now the first items on the stack */
 
 #ifdef CONFIG_EXECUTION_BENCHMARKING

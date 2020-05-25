@@ -95,7 +95,11 @@ static ALWAYS_INLINE bool z_IsInIsr(void)
  */
 static ALWAYS_INLINE void z_ExcSetup(void)
 {
+#if defined(CONFIG_SUPPORT_ISOTEE)
+	NVIC_SetPriority(PendSV_IRQn, CONFIG_ISOTEE_HOST_PENDSV_PRIO);
+#else
 	NVIC_SetPriority(PendSV_IRQn, 0xff);
+#endif
 
 #ifdef CONFIG_CPU_CORTEX_M_HAS_BASEPRI
 	NVIC_SetPriority(SVCall_IRQn, _EXC_SVC_PRIO);

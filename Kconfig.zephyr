@@ -26,7 +26,7 @@ source "boards/Kconfig"
 
 source "$(SOC_DIR)/Kconfig"
 
-source "arch/Kconfig"
+source "$(ARCH_DIR)/Kconfig"
 
 source "kernel/Kconfig"
 

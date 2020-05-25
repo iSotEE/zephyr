@@ -109,7 +109,12 @@ z_arch_switch_to_main_thread(struct k_thread *main_thread,
 	"cpsie i           \n\t"   /* __enable_irq() */
 #elif defined(CONFIG_ARMV7_M_ARMV8_M_MAINLINE)
 	"cpsie if          \n\t"   /* __enable_irq(); __enable_fault_irq() */
+#if defined(CONFIG_SUPPORT_ISOTEE)
+    /* Disable iSotEE guest interrupts */
+	"mov   r1,  %2     \n\t"
+#else
 	"mov   r1,  #0     \n\t"
+#endif
 	"msr   BASEPRI, r1 \n\t"   /* __set_BASEPRI(0) */
 #else
 #error Unknown ARM architecture
@@ -121,6 +126,9 @@ z_arch_switch_to_main_thread(struct k_thread *main_thread,
 	"bl z_thread_entry \n\t"   /* z_thread_entry(_main, 0, 0, 0); */
 	:
 	: "r" (_main), "r" (start_of_main_stack)
+#if defined(CONFIG_SUPPORT_ISOTEE)
+        , "r" (Z_EXC_PRIO(CONFIG_ISOTEE_GUEST_IRQ_PRIO))
+#endif
 	);
 
 	CODE_UNREACHABLE;

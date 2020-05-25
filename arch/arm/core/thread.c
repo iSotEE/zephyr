@@ -128,7 +128,12 @@ void z_new_thread(struct k_thread *thread, k_thread_stack_t *stack,
 #endif
 
 	thread->callee_saved.psp = (u32_t)pInitCtx;
+#if defined(CONFIG_SUPPORT_ISOTEE)
+    /* Mask iSotEE guest interrupts */
+    thread->arch.basepri = Z_EXC_PRIO(CONFIG_ISOTEE_GUEST_IRQ_PRIO);
+#else
 	thread->arch.basepri = 0;
+#endif
 
 #if CONFIG_USERSPACE
 	thread->arch.mode = 0;
