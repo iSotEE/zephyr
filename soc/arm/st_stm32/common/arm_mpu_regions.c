@@ -20,11 +20,10 @@ static const struct arm_mpu_region mpu_regions[] = {
 	/* Region 1 */
 	MPU_REGION_ENTRY("RAM_0",
 			 CONFIG_SRAM_BASE_ADDRESS,
+			 REGION_RAM_ATTR(REGION_SRAM_0_SIZE)),
 #if defined(CONFIG_SUPPORT_ISOTEE)
     /* Disable Region 2 to provide enough MPU regions */
-			 REGION_RAM_ATTR(REGION_SRAM_0_SIZE+REGION_SRAM_1_SIZE)),
 #else
-			 REGION_RAM_ATTR(REGION_SRAM_0_SIZE)),
 	/* Region 2 */
 	MPU_REGION_ENTRY("RAM_1",
 			 (CONFIG_SRAM_BASE_ADDRESS + REGION_SRAM_1_START),
