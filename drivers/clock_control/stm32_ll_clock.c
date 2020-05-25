@@ -6,6 +6,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#if !defined(CONFIG_ISOTEE_GUEST) /* Clock is controlled by the host */
 #include <soc.h>
 #include <soc_registers.h>
 #include <clock_control.h>
@@ -440,3 +441,4 @@ DEVICE_AND_API_INIT(rcc_stm32, STM32_CLOCK_CONTROL_NAME,
 		    PRE_KERNEL_1,
 		    CONFIG_CLOCK_CONTROL_STM32_DEVICE_INIT_PRIORITY,
 		    &stm32_clock_control_api);
+#endif

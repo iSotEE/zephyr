@@ -11,6 +11,10 @@
 #ifndef ZEPHYR_INCLUDE_ARCH_ARM_CORTEX_M_ASM_INLINE_GCC_H_
 #define ZEPHYR_INCLUDE_ARCH_ARM_CORTEX_M_ASM_INLINE_GCC_H_
 
+#if defined(CONFIG_ISOTEE_GUEST)
+#include "isotee_para.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -120,6 +124,17 @@ static ALWAYS_INLINE unsigned int z_arch_irq_lock(void)
 {
 	unsigned int key;
 
+#if defined(CONFIG_ISOTEE_GUEST)
+
+#if defined(CONFIG_ISOTEE_GUEST_USE_INTERRUPT_SUPPRESSED_CRITICAL_SECTION)
+    key = *isotee_para_context_interrupt_suppressed;
+    isotee_para_interrupt_suppress_on();
+#else
+    key = isotee_para_interrupt_disable();
+#endif
+
+#else
+
 #if defined(CONFIG_ARMV6_M_ARMV8_M_BASELINE)
 	__asm__ volatile("mrs %0, PRIMASK;"
 		"cpsid i"
@@ -140,6 +155,8 @@ static ALWAYS_INLINE unsigned int z_arch_irq_lock(void)
 #else
 #error Unknown ARM architecture
 #endif /* CONFIG_ARMV6_M_ARMV8_M_BASELINE */
+
+#endif
 
 	return key;
 }
@@ -166,6 +183,19 @@ static ALWAYS_INLINE unsigned int z_arch_irq_lock(void)
 
 static ALWAYS_INLINE void z_arch_irq_unlock(unsigned int key)
 {
+#if defined(CONFIG_ISOTEE_GUEST)
+    if (key) {
+        return;
+    }
+
+#if defined(CONFIG_ISOTEE_GUEST_USE_INTERRUPT_SUPPRESSED_CRITICAL_SECTION)
+    isotee_para_interrupt_suppress_off();
+#else
+    isotee_para_interrupt_enable();
+#endif
+
+#else
+
 #if defined(CONFIG_ARMV6_M_ARMV8_M_BASELINE)
 	if (key) {
 		return;
@@ -182,6 +212,8 @@ static ALWAYS_INLINE void z_arch_irq_unlock(unsigned int key)
 #else
 #error Unknown ARM architecture
 #endif /* CONFIG_ARMV6_M_ARMV8_M_BASELINE */
+
+#endif
 }
 
 

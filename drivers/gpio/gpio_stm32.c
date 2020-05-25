@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#if !defined(CONFIG_ISOTEE_GUEST) /* GPIO is controlled by the host */
 #include <errno.h>
 
 #include <kernel.h>
@@ -490,3 +491,5 @@ GPIO_DEVICE_INIT_STM32(j, J);
 #ifdef CONFIG_GPIO_STM32_PORTK
 GPIO_DEVICE_INIT_STM32(k, K);
 #endif /* CONFIG_GPIO_STM32_PORTK */
+
+#endif /* !defined(CONFIG_ISOTEE_GUEST) */

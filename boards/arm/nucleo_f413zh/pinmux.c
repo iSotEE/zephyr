@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#if !defined(CONFIG_ISOTEE_GUEST) /* Pinmux is controlled by the host */
 #include <kernel.h>
 #include <device.h>
 #include <init.h>
@@ -52,3 +53,4 @@ static int pinmux_stm32_init(struct device *port)
 
 SYS_INIT(pinmux_stm32_init, PRE_KERNEL_1,
 		CONFIG_PINMUX_STM32_DEVICE_INITIALIZATION_PRIORITY);
+#endif

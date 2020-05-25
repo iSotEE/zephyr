@@ -16,6 +16,7 @@
  * STM32F7: Lines 0 to 15, 16, 17 18, 21, 22 and 23. Others not supported
  *
  */
+#if !defined(CONFIG_ISOTEE_GUEST) /* Physical EXTI is controlled by the host */
 #include <device.h>
 #include <soc.h>
 #include <misc/__assert.h>
@@ -477,3 +478,4 @@ static void __stm32_exti_connect_irqs(struct device *dev)
 #endif /* CONFIG_SOC_SERIES_STM32F7X */
 #endif
 }
+#endif

@@ -51,6 +51,10 @@
 #include <misc/util.h>
 #include <gpio.h>
 
+#if defined(CONFIG_ISOTEE_GUEST)
+#include "isotee_syscall.h"
+#endif
+
 #define LOG_LEVEL CONFIG_USB_DRIVER_LOG_LEVEL
 #include <logging/log.h>
 LOG_MODULE_REGISTER(usb_dc_stm32);
@@ -194,6 +198,9 @@ void HAL_PCD_SOFCallback(PCD_HandleTypeDef *hpcd)
 
 static int usb_dc_stm32_clock_enable(void)
 {
+#if defined(CONFIG_ISOTEE_GUEST)
+	return isotee_host_syscall_invoke0(HOST_AWARE_HYPERCALL_DRIVER_USB_DC_STM32_CLOCK_ENABLE);
+#else
 	struct device *clk = device_get_binding(STM32_CLOCK_CONTROL_NAME);
 	struct stm32_pclken pclken = {
 
@@ -297,6 +304,7 @@ static int usb_dc_stm32_clock_enable(void)
 #endif /* DT_USB_HS_BASE_ADDRESS */
 
 	return 0;
+#endif
 }
 
 #if defined(USB_OTG_FS) || defined(USB_OTG_HS)
